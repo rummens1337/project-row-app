@@ -7,8 +7,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
-import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -22,10 +22,11 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.*;
 
 
 public class MainActivity extends AppCompatActivity {
-
+    private WifiConfiguration wifiConfiguration = new WifiConfiguration();
     private WifiManager wifiManager;
     private ListView wifiList;
     private int listSize = 0;
@@ -33,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private Button btnScan;
     private ArrayList<String> arrayList = new ArrayList<>();
     private ArrayAdapter adapter;
+    private static boolean arrayStatus = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,26 +52,42 @@ public class MainActivity extends AppCompatActivity {
         wifiList = findViewById(R.id.wifiList);
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
+
+        /**
+         * wifiList is assigned the values of arrayList, which is where SSID's are stored in.
+         */
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, arrayList);
         wifiList.setAdapter(adapter);
 
         wifiList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                startActivity(new Intent(MainActivity.this, TestActivity.class));
+                if(arrayStatus) {
+                    wifiConfiguration.SSID = String.format("\"%s\"", arrayList.get(position));
+                    wifiConfiguration.preSharedKey = String.format("\"%s\"", "somepass");
+                    int netId = wifiManager.addNetwork(wifiConfiguration);
+                    wifiManager.disconnect();
+                    wifiManager.enableNetwork(netId, true);
+                    wifiManager.reconnect();
+
+                    showToast(arrayList.get(position));
+                    startActivity(new Intent(MainActivity.this, TestActivity.class));
+                }
             }
         });
 
-        if(checkPermission()){
+        if(checkPermissions()){
             showToast("Alle permissions zijn ingeschakeld.");
         }else{
             showToast("Niet alle permissions zijn ingeschakeld.");
         }
-
-        scanWifi();
+        //TODO: Decide whether command below needs to be executed on startup.
+//        scanWifi();
     }
 
     private void scanWifi() {
+        //Disables the Wifilist until it's done updating, otherwise causes a null-pointer.
+        wifiList.setEnabled(false);
         if (!wifiManager.isWifiEnabled()) {
             showToast("WiFi wordt aangezet...");
             wifiManager.setWifiEnabled(true);
@@ -85,25 +103,36 @@ public class MainActivity extends AppCompatActivity {
     BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            //Status ensures that the list is not clickable till it finishes updating.
+            //This prevents null-pointers.
             results = wifiManager.getScanResults();
             unregisterReceiver(this);
-
+            // Checks if name has a certain structure, following would be correct: david#1, david#11
+            Pattern p = Pattern.compile("^david#[0-9][0-9]?.*");
             for (ScanResult result : results) {
                 //TODO : compare if result.SSID starts with david via regexp
-//                if()
-                arrayList.add(result.SSID + " - " + result.capabilities);
-                adapter.notifyDataSetChanged();
+                Matcher match = p.matcher(result.SSID.toString());
+                if(match.matches()){
+                    arrayList.add(result.SSID);
+                    adapter.notifyDataSetChanged();
+                }
             }
-
+            if(results.isEmpty()){
+                showToast("Geen rover netwerken gevonden..");
+            }
+            // Enables wifilist after it's updated. It's now clickable again.
+            wifiList.setEnabled(true);
         }
     };
+
+
 
     private void showToast(String message) {
         Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG).show();
     }
 
 
-    private boolean checkPermission() {
+    private boolean checkPermissions() {
 
         List<String> permissionsList = new ArrayList<String>();
 
@@ -131,3 +160,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
 }
+
+// TODO: Dit algoritme toepassen zodat er op basis van de uitkomst het wachtwoord wordt ingevoerd
+//    StringBuilder sb = new StringBuilder();
+//        sb.append("david#50");
+//                int swapper = 0;
+//                int total = 0;
+//
+//                for(int i = 0; i < sb.length(); i++){
+//        if(Character.isDigit(sb.charAt(i))) {
+//        swapper += (((int) sb.charAt(i)) - '0') ;
+//        total += sb.charAt(i);
+//        }
+//        }
+//        for(int i  = 0; i < sb.length();i++){
+//        char var;
+//        var = sb.charAt(i);
+//        var += swapper;
+//        sb.setCharAt(i,var);
+//
+//        }
+//        sb.append(total);

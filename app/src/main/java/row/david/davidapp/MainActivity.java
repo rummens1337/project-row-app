@@ -68,9 +68,8 @@ public class MainActivity extends AppCompatActivity {
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
 
-        /**
-         * wifiList is assigned the values of arrayList, which is where SSID's are stored in.
-         */
+
+         //wifiList is assigned the values of arrayList, which is where SSID's are stored in.
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, arrayList);
         wifiList.setAdapter(adapter);
 
@@ -83,13 +82,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // Checks if all required permissions are enabled.
         if (checkPermissions()) {
             showToast("Alle permissions zijn ingeschakeld.");
         } else {
             showToast("Niet alle permissions zijn ingeschakeld.");
         }
-        //TODO: Decide whether command below needs to be executed on startup.
-//        scanWifi();
     }
 
     private void scanWifi() {
@@ -146,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    // Check if all permissions required for the app are granted.
+    // Check if all permissions required for the app are granted by the user.
     private boolean checkPermissions() {
 
         List<String> permissionsList = new ArrayList<String>();
@@ -164,6 +162,10 @@ public class MainActivity extends AppCompatActivity {
         }
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             permissionsList.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
+            permissionsList.add(Manifest.permission.INTERNET);
         }
 
         if (permissionsList.size() > 0) {
@@ -191,6 +193,7 @@ public class MainActivity extends AppCompatActivity {
             if(wifiManager.getConnectionInfo().getSSID().equals(wifiConfiguration.SSID)){
                 showToast("Succesvol verbonden met " + wifiConfiguration.SSID);
                 isConnected = true;
+                startActivity(new Intent(MainActivity.this, WebViewActivity.class));
             }else{
                 showToast("Verbinden met " + wifiConfiguration.SSID + " is niet gelukt..");
             }
@@ -199,9 +202,6 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         return isConnected;
-        //TODO: Add new page which displays the website view
-//                startActivity(new Intent(MainActivity.this, TestActivity.class));
-
     }
 
 
@@ -226,24 +226,3 @@ public class MainActivity extends AppCompatActivity {
         enterPassword.show(ft, "tag");
     }
 }
-
-// TODO: Dit algoritme toepassen zodat er op basis van de uitkomst het wachtwoord wordt ingevoerd
-//StringBuilder sb = new StringBuilder();
-//    sb.append("david#50");
-//    int swapper = 0;
-//            int total = 0;
-//
-//            for(int i = 0; i < sb.length(); i++){
-//    if(Character.isDigit(sb.charAt(i))) {
-//    swapper += (((int) sb.charAt(i)) - '0') ;
-//    total += sb.charAt(i);
-//    }
-//    }
-//    for(int i  = 0; i < sb.length();i++){
-//    char var;
-//    var = sb.charAt(i);
-//    var += swapper;
-//    sb.setCharAt(i,var);
-//
-//    }
-//        sb.append(total);

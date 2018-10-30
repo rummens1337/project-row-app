@@ -2,6 +2,9 @@ package row.david.davidapp;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 public class WebViewActivity extends AppCompatActivity {
 
@@ -9,5 +12,17 @@ public class WebViewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web_view);
+
+        // Declaration of webview
+        WebView myWebView = (WebView) findViewById(R.id.webView);
+        WebSettings webSettings = myWebView.getSettings();
+
+        // Required settings
+        webSettings.setJavaScriptEnabled(true);
+        myWebView.loadUrl("https://www.google.nl/");
+
+        // Just-to-be-sure settings
+        myWebView.setWebViewClient(new WebViewClient()); // Prevents the app from opening a browser, uses built-in browser instead.
+
     }
 }

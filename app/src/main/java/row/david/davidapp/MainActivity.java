@@ -1,6 +1,9 @@
 package row.david.davidapp;
 
 import android.Manifest;
+import android.app.DialogFragment;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -9,7 +12,6 @@ import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
-import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -20,6 +22,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import row.david.davidapp.fragments.EnterPasswordDialogFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +40,17 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> arrayList = new ArrayList<>();
     private ArrayAdapter adapter;
     private static boolean arrayStatus = true;
+    private String roverPassword;
+    // Used to check whether there is a fragment open or not.
+    public boolean checkInFragmentOpen = false;
+
+    public String getRoverPassword() {
+        return roverPassword;
+    }
+
+    public void setRoverPassword(String roverPassword) {
+        this.roverPassword = roverPassword;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // TODO: Check for available WiFI networks,if none found change UI accordingly.
                 scanWifi();
-
             }
         });
         wifiList = findViewById(R.id.wifiList);
@@ -64,17 +78,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 wifiConfiguration.SSID = String.format("\"%s\"", arrayList.get(position));
-
-                wifiConfiguration.preSharedKey = String.format("\"%s\"", "somepass");
-                int netId = wifiManager.addNetwork(wifiConfiguration);
-                wifiManager.disconnect();
-                wifiManager.enableNetwork(netId, true);
-                wifiManager.reconnect();
-
-                showToast(arrayList.get(position));
-                //TODO: Add new page which displays the website view
-//                startActivity(new Intent(MainActivity.this, TestActivity.class));
-
+                // Opens a dialog which enables the user to fill in a password.
+                showEditPasswordDialogFragment();
             }
         });
 
@@ -122,8 +127,9 @@ public class MainActivity extends AppCompatActivity {
             // Also ensures that the list is updated if no results are found, filtering old results.
             // Once again, preventing a null-pointer ^_^.
             if (arrayList.isEmpty()) {
-                for(int i = 0; i < 8; i++){
-                    arrayList.add("david#" + (i+1) + " [Dit is een dummy]");
+                for (int i = 0; i < 8; i++) {
+                    arrayList.add("AndroidWifi");
+                    arrayList.add("david#" + (i + 1) + " [Dit is een dummy]");
                 }
                 adapter.notifyDataSetChanged();
                 showToast("Geen rover netwerken gevonden..");
@@ -134,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
 
+    // Shows a toast on screen
     private void showToast(String message) {
         Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG).show();
     }
@@ -167,6 +174,57 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    public boolean connectToWifi(String password){
+        boolean isConnected = false;
+        // Attempts to connect the user to the desired WiFi network.
+        try {
+            wifiConfiguration.preSharedKey = String.format("\"%s\"", password);
+            int netId = wifiManager.addNetwork(wifiConfiguration);
+            wifiManager.disconnect();
+            wifiManager.enableNetwork(netId, true);
+            wifiManager.reconnect();
+            // Gives the phone enough time to connect.
+            // TODO : Make the thread wait will a connection is made, or connection is refrused.
+            Thread.sleep(500);
+
+            // Checks whether the current connection is equal to the desired connection, Thus checking if the connection is succesfull.
+            if(wifiManager.getConnectionInfo().getSSID().equals(wifiConfiguration.SSID)){
+                showToast("Succesvol verbonden met " + wifiConfiguration.SSID);
+                isConnected = true;
+            }else{
+                showToast("Verbinden met " + wifiConfiguration.SSID + " is niet gelukt..");
+            }
+        }catch(Exception e){
+            showToast("Er ging iets goed mis in het maken van een verbinding... :O");
+            e.printStackTrace();
+        }
+        return isConnected;
+        //TODO: Add new page which displays the website view
+//                startActivity(new Intent(MainActivity.this, TestActivity.class));
+
+    }
+
+
+    /**
+     * Open Dialogfragment which handles the userinput for password.
+     */
+
+    private void showEditPasswordDialogFragment() {
+        if (checkInFragmentOpen) return;
+        checkInFragmentOpen = true;
+
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        Fragment prev = getFragmentManager().findFragmentByTag("tag");
+        if (prev != null) {
+            ft.remove(prev);
+        }
+        ft.addToBackStack(null);
+
+        // Create and show the dialog.
+        DialogFragment enterPassword = EnterPasswordDialogFragment.newInstance();
+        enterPassword.setCancelable(false);
+        enterPassword.show(ft, "tag");
+    }
 }
 
 // TODO: Dit algoritme toepassen zodat er op basis van de uitkomst het wachtwoord wordt ingevoerd

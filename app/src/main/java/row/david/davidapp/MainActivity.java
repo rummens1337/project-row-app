@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -62,23 +63,24 @@ public class MainActivity extends AppCompatActivity {
         wifiList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if(arrayStatus) {
-                    wifiConfiguration.SSID = String.format("\"%s\"", arrayList.get(position));
-                    wifiConfiguration.preSharedKey = String.format("\"%s\"", "somepass");
-                    int netId = wifiManager.addNetwork(wifiConfiguration);
-                    wifiManager.disconnect();
-                    wifiManager.enableNetwork(netId, true);
-                    wifiManager.reconnect();
+                wifiConfiguration.SSID = String.format("\"%s\"", arrayList.get(position));
 
-                    showToast(arrayList.get(position));
-                    startActivity(new Intent(MainActivity.this, TestActivity.class));
-                }
+                wifiConfiguration.preSharedKey = String.format("\"%s\"", "somepass");
+                int netId = wifiManager.addNetwork(wifiConfiguration);
+                wifiManager.disconnect();
+                wifiManager.enableNetwork(netId, true);
+                wifiManager.reconnect();
+
+                showToast(arrayList.get(position));
+                //TODO: Add new page which displays the website view
+//                startActivity(new Intent(MainActivity.this, TestActivity.class));
+
             }
         });
 
-        if(checkPermissions()){
+        if (checkPermissions()) {
             showToast("Alle permissions zijn ingeschakeld.");
-        }else{
+        } else {
             showToast("Niet alle permissions zijn ingeschakeld.");
         }
         //TODO: Decide whether command below needs to be executed on startup.
@@ -86,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void scanWifi() {
-        //Disables the Wifilist until it's done updating, otherwise causes a null-pointer.
+        //Disables the Wifilist until it's done updating, otherwise causes a null-pointer when clicking.
         wifiList.setEnabled(false);
         if (!wifiManager.isWifiEnabled()) {
             showToast("WiFi wordt aangezet...");
@@ -108,16 +110,22 @@ public class MainActivity extends AppCompatActivity {
             results = wifiManager.getScanResults();
             unregisterReceiver(this);
             // Checks if name has a certain structure, following would be correct: david#1, david#11
-            Pattern p = Pattern.compile("^david#[0-9][0-9]?.*");
+            Pattern p = Pattern.compile("^david#[0-9][0-9]?[0-9]?$");
             for (ScanResult result : results) {
-                //TODO : compare if result.SSID starts with david via regexp
                 Matcher match = p.matcher(result.SSID.toString());
-                if(match.matches()){
+                if (match.matches()) {
                     arrayList.add(result.SSID);
                     adapter.notifyDataSetChanged();
                 }
             }
-            if(results.isEmpty()){
+            // Fills the array with dummy data if no rover networks are found.
+            // Also ensures that the list is updated if no results are found, filtering old results.
+            // Once again, preventing a null-pointer ^_^.
+            if (arrayList.isEmpty()) {
+                for(int i = 0; i < 8; i++){
+                    arrayList.add("david#" + (i+1) + " [Dit is een dummy]");
+                }
+                adapter.notifyDataSetChanged();
                 showToast("Geen rover netwerken gevonden..");
             }
             // Enables wifilist after it's updated. It's now clickable again.
@@ -126,12 +134,12 @@ public class MainActivity extends AppCompatActivity {
     };
 
 
-
     private void showToast(String message) {
         Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG).show();
     }
 
 
+    // Check if all permissions required for the app are granted.
     private boolean checkPermissions() {
 
         List<String> permissionsList = new ArrayList<String>();
@@ -147,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             permissionsList.add(Manifest.permission.ACCESS_COARSE_LOCATION);
         }
-        if(ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             permissionsList.add(Manifest.permission.ACCESS_FINE_LOCATION);
         }
 
@@ -162,22 +170,22 @@ public class MainActivity extends AppCompatActivity {
 }
 
 // TODO: Dit algoritme toepassen zodat er op basis van de uitkomst het wachtwoord wordt ingevoerd
-//    StringBuilder sb = new StringBuilder();
-//        sb.append("david#50");
-//                int swapper = 0;
-//                int total = 0;
+//StringBuilder sb = new StringBuilder();
+//    sb.append("david#50");
+//    int swapper = 0;
+//            int total = 0;
 //
-//                for(int i = 0; i < sb.length(); i++){
-//        if(Character.isDigit(sb.charAt(i))) {
-//        swapper += (((int) sb.charAt(i)) - '0') ;
-//        total += sb.charAt(i);
-//        }
-//        }
-//        for(int i  = 0; i < sb.length();i++){
-//        char var;
-//        var = sb.charAt(i);
-//        var += swapper;
-//        sb.setCharAt(i,var);
+//            for(int i = 0; i < sb.length(); i++){
+//    if(Character.isDigit(sb.charAt(i))) {
+//    swapper += (((int) sb.charAt(i)) - '0') ;
+//    total += sb.charAt(i);
+//    }
+//    }
+//    for(int i  = 0; i < sb.length();i++){
+//    char var;
+//    var = sb.charAt(i);
+//    var += swapper;
+//    sb.setCharAt(i,var);
 //
-//        }
+//    }
 //        sb.append(total);

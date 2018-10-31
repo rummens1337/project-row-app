@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.regex.*;
 
 
-public class MainActivity extends AppCompatActivity {
+public class SelectRoverActivity extends AppCompatActivity {
     private WifiConfiguration wifiConfiguration = new WifiConfiguration();
     private WifiManager wifiManager;
     private ListView wifiList;
@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.select_rover);
         btnScan = findViewById(R.id.btnScan);
         btnScan.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Shows a toast on screen
     private void showToast(String message) {
-        Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG).show();
+        Toast.makeText(SelectRoverActivity.this, message, Toast.LENGTH_LONG).show();
     }
 
 
@@ -193,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
             if(wifiManager.getConnectionInfo().getSSID().equals(wifiConfiguration.SSID)){
                 showToast("Succesvol verbonden met " + wifiConfiguration.SSID);
                 isConnected = true;
-                startActivity(new Intent(MainActivity.this, WebViewActivity.class));
+                startActivity(new Intent(SelectRoverActivity.this, WebViewActivity.class));
             }else{
                 showToast("Verbinden met " + wifiConfiguration.SSID + " is niet gelukt..");
             }

@@ -9,9 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
-import row.david.davidapp.MainActivity;
+import row.david.davidapp.SelectRoverActivity;
 import row.david.davidapp.R;
 
 
@@ -19,8 +18,8 @@ public class EnterPasswordDialogFragment extends DialogFragment implements View.
     private Button btnConnectToRover, btnCancel;
     private EditText etWifiPassword;
 
-    // Reference to MainActivity
-    private MainActivity mContext;
+    // Reference to SelectRoverActivity
+    private SelectRoverActivity mContext;
 
 
     public static EnterPasswordDialogFragment newInstance() {
@@ -39,10 +38,10 @@ public class EnterPasswordDialogFragment extends DialogFragment implements View.
         super.onAttach(context);
         // We need a reference to the main activity, we get this in onAttach
         // When a developer opens this fragment from a wrong class, the exception is thrown
-        if (context instanceof MainActivity) {
-            mContext = (MainActivity) context;
+        if (context instanceof SelectRoverActivity) {
+            mContext = (SelectRoverActivity) context;
         } else {
-            throw new IllegalStateException("Start this function from the MainActivity");
+            throw new IllegalStateException("Start this function from the SelectRoverActivity");
         }
     }
 
@@ -78,6 +77,7 @@ public class EnterPasswordDialogFragment extends DialogFragment implements View.
             case R.id.connect_to_rover:
                 try {
                     // Checks if connection was succesfull. If so, releasing the dialog fragment.
+                    // TODO: Create a 2-way authenticator which also asks for the password on the rover.
                     if(mContext.connectToWifi(etWifiPassword.getText().toString())){
                         dismiss();
                     }

@@ -20,7 +20,7 @@ public class WebViewActivity extends AppCompatActivity {
         // Required settings
         webSettings.setJavaScriptEnabled(true);
         // TODO: Redirect the user to the correct website. Preferably something like raspberrypi.local.
-        myWebView.loadUrl("https://www.youtube.nl/");
+        myWebView.loadUrl("http://192.168.4.1");
 
         // Just-to-be-sure settings
         myWebView.setWebViewClient(new WebViewClient()); // Prevents the app from opening a browser, uses built-in browser instead.

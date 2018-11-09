@@ -56,6 +56,8 @@ public class SelectRoverActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.select_rover);
+
+        // Add a scanbutton, which calls the scanWifi function.
         btnScan = findViewById(R.id.btnScan);
         btnScan.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -76,9 +78,24 @@ public class SelectRoverActivity extends AppCompatActivity {
         wifiList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                wifiConfiguration.SSID = String.format("\"%s\"", arrayList.get(position));
-                // Opens a dialog which enables the user to fill in a password.
-                showEditPasswordDialogFragment();
+                boolean isSaved = false;
+                String SSID = String.format("\"%s\"", arrayList.get(position));
+                wifiConfiguration.SSID = SSID;
+                int netId = -1;
+
+                for (WifiConfiguration tmp : wifiManager.getConfiguredNetworks()) {
+                    // Checks whether selected WiFi is already saved, and handles accordingly.
+                    if (tmp.SSID.equals(SSID)) {
+                        netId = tmp.networkId;
+                        wifiManager.enableNetwork(netId, true);
+                        isSaved = true;
+                        checkWifiConnection();
+                    }
+                }
+
+                if(!isSaved){
+                    showEditPasswordDialogFragment();
+                }
             }
         });
 
@@ -177,7 +194,6 @@ public class SelectRoverActivity extends AppCompatActivity {
     }
 
     public boolean connectToWifi(String password){
-        boolean isConnected = false;
         // Attempts to connect the user to the desired WiFi network.
         try {
             wifiConfiguration.preSharedKey = String.format("\"%s\"", password);
@@ -189,18 +205,29 @@ public class SelectRoverActivity extends AppCompatActivity {
             // TODO : Make the thread wait will a connection is made, or connection is refrused.
             Thread.sleep(500);
 
-            // Checks whether the current connection is equal to the desired connection, Thus checking if the connection is succesfull.
-            if(wifiManager.getConnectionInfo().getSSID().equals(wifiConfiguration.SSID)){
-                showToast("Succesvol verbonden met " + wifiConfiguration.SSID);
-                isConnected = true;
-                startActivity(new Intent(SelectRoverActivity.this, WebViewActivity.class));
-            }else{
-                showToast("Verbinden met " + wifiConfiguration.SSID + " is niet gelukt..");
-            }
         }catch(Exception e){
-            showToast("Er ging iets goed mis in het maken van een verbinding... :O");
             e.printStackTrace();
         }
+        // Checks if the wifi connection was succesfull, by calling the checkWifiConnection function.
+        return checkWifiConnection();
+    }
+
+    public boolean checkWifiConnection(){
+        boolean isConnected = false;
+        try{
+        // Checks whether the current connection is equal to the desired connection, Thus checking if the connection is succesfull.
+        if(wifiManager.getConnectionInfo().getSSID().equals(wifiConfiguration.SSID)){
+            showToast("Succesvol verbonden met " + wifiConfiguration.SSID);
+            isConnected = true;
+            startActivity(new Intent(SelectRoverActivity.this, WebViewActivity.class));
+        }else{
+            showToast("Verbinden met " + wifiConfiguration.SSID + " is niet gelukt..");
+            showEditPasswordDialogFragment();
+        }
+    }catch(Exception e){
+        showToast("Er ging iets goed mis in het maken van een verbinding... :O");
+        e.printStackTrace();
+    }
         return isConnected;
     }
 

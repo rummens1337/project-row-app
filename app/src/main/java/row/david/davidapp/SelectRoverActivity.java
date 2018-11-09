@@ -75,24 +75,33 @@ public class SelectRoverActivity extends AppCompatActivity {
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, arrayList);
         wifiList.setAdapter(adapter);
 
+
         wifiList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                boolean isSaved = false;
+
                 String SSID = String.format("\"%s\"", arrayList.get(position));
                 wifiConfiguration.SSID = SSID;
-                int netId = -1;
 
+                int netId = -1;
+                boolean isSaved = false;
                 for (WifiConfiguration tmp : wifiManager.getConfiguredNetworks()) {
                     // Checks whether selected WiFi is already saved, and handles accordingly.
                     if (tmp.SSID.equals(SSID)) {
                         netId = tmp.networkId;
                         wifiManager.enableNetwork(netId, true);
                         isSaved = true;
+                        try {
+                            // TODO : Make the thread wait will a connection is made, or connection is refrused.
+                            Thread.sleep(1000);
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+
                         checkWifiConnection();
+                        break;
                     }
                 }
-
                 if(!isSaved){
                     showEditPasswordDialogFragment();
                 }

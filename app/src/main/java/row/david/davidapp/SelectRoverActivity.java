@@ -52,6 +52,10 @@ public class SelectRoverActivity extends AppCompatActivity {
         this.roverPassword = roverPassword;
     }
 
+    /**
+     * START ONCREATE
+     */
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,7 +67,12 @@ public class SelectRoverActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // TODO: Check for available WiFI networks,if none found change UI accordingly.
-                scanWifi();
+                // Checks if all permissions are met.
+                if(checkPermissions()) {
+                    scanWifi();
+                } else{
+                    showToast("Niet alle permissions zijn ingeschakeld.");
+                }
             }
         });
         wifiList = findViewById(R.id.wifiList);
@@ -107,14 +116,13 @@ public class SelectRoverActivity extends AppCompatActivity {
                 }
             }
         });
-
-        // Checks if all required permissions are enabled.
-        if (checkPermissions()) {
-            showToast("Alle permissions zijn ingeschakeld.");
-        } else {
-            showToast("Niet alle permissions zijn ingeschakeld.");
-        }
+        checkPermissions();
     }
+
+    /**
+     * END ONCREATE
+     */
+
 
     private void scanWifi() {
         //Disables the Wifilist until it's done updating, otherwise causes a null-pointer when clicking.

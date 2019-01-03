@@ -21,18 +21,20 @@ public class EnterPasswordDialogFragment extends DialogFragment implements View.
     // Reference to SelectRoverActivity
     private SelectRoverActivity mContext;
 
-
     public static EnterPasswordDialogFragment newInstance() {
         EnterPasswordDialogFragment fragment = new EnterPasswordDialogFragment();
 
-        // We need the student card serial in this fragment.
-        // Therefor we bundle a string when we opened this fragment.
+        // Therefore we bundle a string when we opened this fragment.
         Bundle args = new Bundle();
         fragment.setArguments(args);
 
         return fragment;
     }
 
+    /**
+     * Called when the fragment is shown.
+     * @param context a reference to the context (activity or fragment) where it's shown from.
+     */
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -45,6 +47,10 @@ public class EnterPasswordDialogFragment extends DialogFragment implements View.
         }
     }
 
+    /**
+     * onCreate is called when the object is instantiated.
+     * @param savedInstanceState state in which you can save instances.
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,6 +70,10 @@ public class EnterPasswordDialogFragment extends DialogFragment implements View.
         return view;
     }
 
+    /**
+     * An onClick listener for the entire fragment.
+     * @param v The fragment view, which covers the entire screen.
+     */
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -88,6 +98,10 @@ public class EnterPasswordDialogFragment extends DialogFragment implements View.
         }
     }
 
+    /**
+     * Called when the dialogFragment is dismissed.
+     * @param dialog the dialogFragment.
+     */
     @Override
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);

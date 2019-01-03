@@ -44,18 +44,14 @@ public class SelectRoverActivity extends AppCompatActivity {
     // Used to check whether there is a fragment open or not.
     public boolean checkInFragmentOpen = false;
 
-    public String getRoverPassword() {
-        return roverPassword;
-    }
-
-    public void setRoverPassword(String roverPassword) {
-        this.roverPassword = roverPassword;
-    }
-
-    /**
+    /*
      * START ONCREATE
      */
 
+    /**
+     * onCreate is called when the object is instantiated.
+     * @param savedInstanceState state in which you can save instances.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,7 +59,11 @@ public class SelectRoverActivity extends AppCompatActivity {
 
         // Add a scanbutton, which calls the scanWifi function.
         btnScan = findViewById(R.id.btnScan);
-        btnScan.setOnClickListener(new View.OnClickListener() {
+        btnScan.setOnClickListener( new View.OnClickListener() {
+            /**
+             * Set an onclicklistener for the scan button
+             * @param v The view to be altered.
+             */
             @Override
             public void onClick(View v) {
                 // TODO: Check for available WiFI networks,if none found change UI accordingly.
@@ -101,7 +101,7 @@ public class SelectRoverActivity extends AppCompatActivity {
                         wifiManager.enableNetwork(netId, true);
                         isSaved = true;
                         try {
-                            // TODO : Make the thread wait will a connection is made, or connection is refrused.
+                            // TODO : Make the thread wait till a connection is made, or connection is refused.
                             Thread.sleep(1000);
                         }catch (Exception e){
                             e.printStackTrace();
@@ -119,13 +119,14 @@ public class SelectRoverActivity extends AppCompatActivity {
         checkPermissions();
     }
 
-    /**
+    /*
      * END ONCREATE
      */
 
-
+    /**
+     * Disables the Wifilist until it's done updating, otherwise causes a null-pointer when clicking.
+     */
     private void scanWifi() {
-        //Disables the Wifilist until it's done updating, otherwise causes a null-pointer when clicking.
         wifiList.setEnabled(false);
         if (!wifiManager.isWifiEnabled()) {
             showToast("WiFi wordt aangezet...");
@@ -139,7 +140,13 @@ public class SelectRoverActivity extends AppCompatActivity {
 
     }
 
+
     BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
+        /**
+         *
+         * @param context The current context
+         * @param intent The current intent
+         */
         @Override
         public void onReceive(Context context, Intent intent) {
             //Status ensures that the list is not clickable till it finishes updating.
@@ -172,13 +179,19 @@ public class SelectRoverActivity extends AppCompatActivity {
     };
 
 
-    // Shows a toast on screen
+    /**
+     * Shows a toast on screen
+     * @param message Message to be shown in toast.
+     */
     private void showToast(String message) {
         Toast.makeText(SelectRoverActivity.this, message, Toast.LENGTH_LONG).show();
     }
 
 
-    // Check if all permissions required for the app are granted by the user.
+    /**
+     * Check if all permissions required for the app are granted by the user.
+     * @return boolean permissions granted, which can be true or false.
+     */
     private boolean checkPermissions() {
 
         List<String> permissionsList = new ArrayList<String>();
@@ -210,8 +223,12 @@ public class SelectRoverActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * Attempts to connect the user to the desired WiFi network.
+     * @param password The password that was entered.
+     * @return boolean wifiConnected, which can be true or false.
+     */
     public boolean connectToWifi(String password){
-        // Attempts to connect the user to the desired WiFi network.
         try {
             wifiConfiguration.preSharedKey = String.format("\"%s\"", password);
             int netId = wifiManager.addNetwork(wifiConfiguration);
@@ -219,7 +236,7 @@ public class SelectRoverActivity extends AppCompatActivity {
             wifiManager.enableNetwork(netId, true);
             wifiManager.reconnect();
             // Gives the phone enough time to connect.
-            // TODO : Make the thread wait will a connection is made, or connection is refrused.
+            // TODO : Make the thread wait till a connection is made, or connection is refused.
             Thread.sleep(500);
 
         }catch(Exception e){
@@ -229,10 +246,13 @@ public class SelectRoverActivity extends AppCompatActivity {
         return checkWifiConnection();
     }
 
+    /**
+     * Checks whether the current connection is equal to the desired connection, Thus checking if the connection is succesfull.
+     * @return Whether the user is connected to the correct WiFi signal.
+     */
     public boolean checkWifiConnection(){
         boolean isConnected = false;
         try{
-        // Checks whether the current connection is equal to the desired connection, Thus checking if the connection is succesfull.
         if(wifiManager.getConnectionInfo().getSSID().equals(wifiConfiguration.SSID)){
             showToast("Succesvol verbonden met " + wifiConfiguration.SSID);
             isConnected = true;

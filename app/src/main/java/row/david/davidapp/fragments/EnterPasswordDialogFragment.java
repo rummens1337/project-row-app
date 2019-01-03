@@ -13,7 +13,10 @@ import android.widget.EditText;
 import row.david.davidapp.SelectRoverActivity;
 import row.david.davidapp.R;
 
-
+/**
+ * Shows a dialogFragment where user may enter password
+ * @author Michel Rummens
+ */
 public class EnterPasswordDialogFragment extends DialogFragment implements View.OnClickListener {
     private Button btnConnectToRover, btnCancel;
     private EditText etWifiPassword;

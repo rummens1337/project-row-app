@@ -29,7 +29,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.*;
 
-
+/**
+ * Main activity, shown on startup.
+ * @author Michel Rummens
+ */
 public class SelectRoverActivity extends AppCompatActivity {
     private WifiConfiguration wifiConfiguration = new WifiConfiguration();
     private WifiManager wifiManager;

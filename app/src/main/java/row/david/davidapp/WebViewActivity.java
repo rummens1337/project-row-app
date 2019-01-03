@@ -6,6 +6,10 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+/**
+ * Shows a webview, which covers the entire screen.
+ * @author Michel Rummens
+ */
 public class WebViewActivity extends AppCompatActivity {
 
     /**
